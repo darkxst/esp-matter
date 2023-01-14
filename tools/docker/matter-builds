@@ -1,18 +1,50 @@
 ARG VERSION=latest
 FROM connectedhomeip/chip-build-esp32:${VERSION} as build
 
+# To build the image for a branch or a tag of ESP-MATTER, pass --build-arg ESP_MATTER_CLONE_BRANCH_OR_TAG=name.
+# To build the image with a specific commit ID of ESP-MATTER, pass --build-arg ESP_MATTER_CHECKOUT_REF=commit-id.
+# It is possible to combine both, e.g.:
+#   ESP_MATTER_CLONE_BRANCH_OR_TAG=release/vX.Y
+#   ESP_MATTER_CHECKOUT_REF=<some commit on release/vX.Y branch>.
+# Use ESP_MATTER_CLONE_SHALLOW=1 to perform shallow clone (i.e. --depth=1 --shallow-submodules)
+
+ARG ESP_MATTER_CLONE_URL=https://github.com/espressif/esp-matter.git
+ARG ESP_MATTER_CLONE_BRANCH_OR_TAG=main
+ARG ESP_MATTER_CHECKOUT_REF=
+ARG ESP_MATTER_CLONE_SHALLOW=
+
 WORKDIR /opt/espressif
 ENV ESP_MATTER_PATH=/opt/espressif/esp-matter
 
 RUN set -x \
-    && git clone --depth 1 https://github.com/espressif/esp-matter.git \
-    && cd esp-matter \
-    && git submodule update --init --depth 1 \
-    && cd ./connectedhomeip/connectedhomeip \
-    && ./scripts/checkout_submodules.py --platform esp32 linux --shallow \
-    && cd ../.. \
+    && if [ -n "$ESP_MATTER_CLONE_SHALLOW" ]; then \
+      git clone --depth 1 \
+        ${ESP_MATTER_CLONE_BRANCH_OR_TAG:+-b $ESP_MATTER_CLONE_BRANCH_OR_TAG} \
+        $ESP_MATTER_CLONE_URL $ESP_MATTER_PATH; \
+    else \
+      git clone --recursive \
+        ${ESP_MATTER_CLONE_BRANCH_OR_TAG:+-b $ESP_MATTER_CLONE_BRANCH_OR_TAG} \
+        $ESP_MATTER_CLONE_URL $ESP_MATTER_PATH; \
+    fi \
+    && cd $ESP_MATTER_PATH \
+    && if [ -n "$ESP_MATTER_CHECKOUT_REF" ]; then \
+      git checkout $ESP_MATTER_CHECKOUT_REF \
+      && if [ -n "$ESP_MATTER_CLONE_SHALLOW" ]; then \
+        git fetch origin --depth 1 --recurse-submodules ${ESP_MATTER_CHECKOUT_REF}; \
+      fi; \
+    fi \
+    && if [ -n "$ESP_MATTER_CLONE_SHALLOW" ]; then \
+      git submodule update --init --depth 1 \
+      && cd ./connectedhomeip/connectedhomeip \
+      && ./scripts/checkout_submodules.py --platform esp32 linux --shallow \
+      && cd ../..; \
+    fi \
     && . $IDF_PATH/export.sh \
     && ./install.sh \
     && : # last line
+
+COPY entrypoint.sh /opt/esp/entrypoint.sh
+ENTRYPOINT [ "/opt/esp/entrypoint.sh" ]
+CMD [ "/bin/bash" ]
 
 WORKDIR /opt/espressif/esp-matter
