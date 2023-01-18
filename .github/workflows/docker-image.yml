@@ -59,5 +59,4 @@ jobs:
           platforms: ${{ env.BUILD_PLATFORMS }}
           build-args: |
             ESP_MATTER_CLONE_URL=${{ github.server_url }}/${{ github.repository }}.git
-            ESP_MATTER_CLONE_SHALLOW=1
             IDF_CLONE_SHALLOW=1

@@ -19,7 +19,6 @@ These are the different build arguments that can be used:
 - ``ESP_MATTER_CLONE_URL``: URL of the repository to clone Espressif's SDK for Matter. Can be set to a custom URL when working with a fork of Espressif's SDK for Matter. Default is ``https://github.com/espressif/esp-matter.git``.
 - ``ESP_MATTER_CLONE_BRANCH_OR_TAG``: Name of a git branch or tag use when cloning Espressif's SDK for Matter. This value is passed to ``git clone`` command using the ``--branch`` argument. Default is ``main``.
 - ``ESP_MATTER_CHECKOUT_REF``: If this argument is set to a non-empty value, ``git checkout $ESP_MATTER_CHECKOUT_REF`` command will be performed after cloning. This argument can be set to the SHA of the specific commit to check out, for example if some specific commit on a release branch is desired.
-- ``ESP_MATTER_CLONE_SHALLOW``: If this argument is set to a non-empty value, ``--depth=1`` argument will be used when performing ``git clone`` and it will download only the required submodules by Matter for ESP32 platform only using [``checkout_submodules.py``](https://github.com/project-chip/connectedhomeip/blob/master/scripts/checkout_submodules.py). If it is empty will clone recursively all the submodules from Matter repository.
 
 You can also use build arguments to control the ESP-IDF
 - ``IDF_CLONE_URL``: URL of the repository to clone ESP-IDF from. Can be set to a custom URL when working with a fork of ESP-IDF. Default is ``https://github.com/espressif/esp-idf.git``.
