@@ -37,7 +37,7 @@ jobs:
 
     strategy:
       matrix:
-        IDF_VERSION: [v4.4.3, v5.0]
+        IDF_VERSION: [{branch_or_tag: v5.0.1}, {branch_or_tag: release-v5.1, ref: bb9200ace} ]
 
     steps:
       # The following steps are the standard boilerplate from
@@ -59,9 +59,10 @@ jobs:
           context: tools/docker
           file: tools/docker/matter-builds
           push: true
-          tags: ${{ env.DOCKERHUB_REPO }}:${{ env.TAG_NAME }}${{ matrix.IDF_VERSION != 'v4.4.3' && format('_idf{0}', matrix.IDF_VERSION) || ''}}
+          tags: ${{ env.DOCKERHUB_REPO }}:${{ env.TAG_NAME }}${{ ((matrix.IDF_VERSION.branch_or_tag && matrix.IDF_VERSION.branch_or_tag != 'v5.0.1') || matrix.IDF_VERSION.ref ) && '_idf' || ''}}${{ matrix.IDF_VERSION.branch_or_tag && matrix.IDF_VERSION.branch_or_tag != 'v5.0.1' && format('_{0}', matrix.IDF_VERSION.branch_or_tag) || ''}}${{ matrix.IDF_VERSION.ref && format('_{0}', matrix.IDF_VERSION.ref) || ''}}
           platforms: ${{ env.BUILD_PLATFORMS }}
           build-args: |
             ESP_MATTER_CLONE_URL=${{ github.server_url }}/${{ github.repository }}.git
             IDF_CLONE_SHALLOW=1
-            IDF_CLONE_BRANCH_OR_TAG=${{ matrix.IDF_VERSION }}
+            IDF_CLONE_BRANCH_OR_TAG=${{ matrix.IDF_VERSION.branch_or_tag }}
+            IDF_CLONE_REF=${{ matrix.IDF_VERSION.ref }}

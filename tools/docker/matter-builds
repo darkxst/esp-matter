@@ -22,6 +22,7 @@ ARG IDF_CHECKOUT_REF=
 ARG IDF_CLONE_SHALLOW=
 
 RUN set -x \
+    && IDF_CLONE_BRANCH_OR_TAG=$(echo "$IDF_CLONE_BRANCH_OR_TAG" | sed 's/-/\//g') \
     && git clone --recursive \
       ${IDF_CLONE_SHALLOW:+--depth=1 --shallow-submodules} \
       ${IDF_CLONE_BRANCH_OR_TAG:+-b $IDF_CLONE_BRANCH_OR_TAG} \
