@@ -37,7 +37,7 @@ jobs:
 
     strategy:
       matrix:
-        IDF_VERSION: [{branch_or_tag: v5.0.1}, {branch_or_tag: release-v5.1, ref: bb9200ace} ]
+        IDF_VERSION: [{branch_or_tag: v4.4.3}, {branch_or_tag: release-v5.1, ref: bb9200ace} ]
 
     steps:
       # The following steps are the standard boilerplate from
