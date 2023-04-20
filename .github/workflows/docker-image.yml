@@ -30,6 +30,7 @@ env:
   # Github runner is running out of space when we are building for multiple architectures in single runner
   BUILD_PLATFORMS: linux/amd64
   DOCKERHUB_REPO: ${{ github.repository }}
+  REQUIRED_IDF_VERSION: v4.4.3
 
 jobs:
   build:
@@ -38,8 +39,6 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    env:
-      REQUIRED_VERSION: v4.4.3
 
     strategy:
       matrix:
@@ -102,5 +101,5 @@ jobs:
             ESP_MATTER_CLONE_URL=${{ github.server_url }}/${{ github.repository }}.git
             ESP_MATTER_CLONE_BRANCH_OR_TAG=${{ env.CLONE_BRANCH_OR_TAG }}
             IDF_CLONE_SHALLOW=1
-            IDF_CLONE_BRANCH_OR_TAG=${{ matrix.IDF_VERSION.branch_or_tag || env.REQUIRED_VERSION}}
+            IDF_CLONE_BRANCH_OR_TAG=${{ matrix.IDF_VERSION.branch_or_tag || env.REQUIRED_IDF_VERSION}}
             IDF_CLONE_REF=${{ matrix.IDF_VERSION.ref }}
