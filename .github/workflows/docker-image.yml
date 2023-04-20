@@ -16,7 +16,11 @@ name: Build Docker
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - 'main'
+      - 'release/*'
+    tags:
+      - 'v*.*'
 
   # Can be run manually
   workflow_dispatch:
@@ -26,7 +30,6 @@ env:
   # Github runner is running out of space when we are building for multiple architectures in single runner
   BUILD_PLATFORMS: linux/amd64
   DOCKERHUB_REPO: ${{ github.repository }}
-  TAG_NAME: latest
 
 jobs:
   build:
@@ -40,9 +43,40 @@ jobs:
 
     strategy:
       matrix:
-        IDF_VERSION: [{}, {branch_or_tag: release-v5.1, ref: bb9200ace} ]
+        IDF_VERSION: [{}, {branch_or_tag: release-v5.1, ref: bb9200ace}]
 
     steps:
+      # Depending on the branch/tag, set CLONE_BRANCH_OR_TAG variable (used in the Dockerfile
+      # as a build arg) and TAG_NAME (used when tagging the image).
+      #
+      # The following 3 steps cover the alternatives (tag, release branch, main branch):
+      - name: Set variables (tags)
+        if: ${{ github.ref_type == 'tag' }}
+        run: |
+          echo "CLONE_BRANCH_OR_TAG=$GITHUB_REF_NAME" >> $GITHUB_ENV
+          echo "TAG_NAME=$GITHUB_REF_NAME" >> $GITHUB_ENV
+      - name: Set variables (release branches)
+        if: ${{ github.ref_type == 'branch' && startsWith(github.ref_name, 'release/') }}
+        run: |
+          echo "CLONE_BRANCH_OR_TAG=$GITHUB_REF_NAME" >> $GITHUB_ENV
+          echo "TAG_NAME=release-${GITHUB_REF_NAME##release/}" >> $GITHUB_ENV
+      - name: Set variables (main branch)
+        if: ${{ github.ref_type == 'branch' && github.ref_name == 'main' }}
+        run: |
+          echo "CLONE_BRANCH_OR_TAG=main" >> $GITHUB_ENV
+          echo "TAG_NAME=latest" >> $GITHUB_ENV
+      - name: Set extra tag information
+        if: ${{ matrix.IDF_VERSION.branch_or_tag }}
+        run: |
+          echo "TAG_NAME=${{ env.TAG_NAME }}${{ matrix.IDF_VERSION.branch_or_tag && format('_idf_{0}', matrix.IDF_VERSION.branch_or_tag) || ''}}" >> $GITHUB_ENV
+
+      # Display the variables set above, just in case.
+      - name: Check variables
+        run: |
+          echo "CLONE_BRANCH_OR_TAG: $CLONE_BRANCH_OR_TAG"
+          echo "CHECKOUT_REF: $CHECKOUT_REF"
+          echo "TAG_NAME: $TAG_NAME"
+
       # The following steps are the standard boilerplate from
       # https://github.com/marketplace/actions/build-and-push-docker-images
       - name: Checkout
@@ -62,10 +96,11 @@ jobs:
           context: tools/docker
           file: tools/docker/matter-builds
           push: true
-          tags: ${{ env.DOCKERHUB_REPO }}:${{ env.TAG_NAME }}${{ matrix.IDF_VERSION.branch_or_tag && format('_idf_{0}', matrix.IDF_VERSION.branch_or_tag) || ''}}
+          tags: ${{ env.DOCKERHUB_REPO }}:${{ env.TAG_NAME }}
           platforms: ${{ env.BUILD_PLATFORMS }}
           build-args: |
             ESP_MATTER_CLONE_URL=${{ github.server_url }}/${{ github.repository }}.git
+            ESP_MATTER_CLONE_BRANCH_OR_TAG=${{ env.CLONE_BRANCH_OR_TAG }}
             IDF_CLONE_SHALLOW=1
             IDF_CLONE_BRANCH_OR_TAG=${{ matrix.IDF_VERSION.branch_or_tag || env.REQUIRED_VERSION}}
             IDF_CLONE_REF=${{ matrix.IDF_VERSION.ref }}
