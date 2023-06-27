@@ -50,6 +50,8 @@ jobs:
       # as a build arg) and TAG_NAME (used when tagging the image).
       #
       # The following 3 steps cover the alternatives (tag, release branch, main branch):
+      - run: sudo rm -rf /usr/share/dotnet
+      - run: sudo rm -rf "$AGENT_TOOLSDIRECTORY"
       - name: Set variables (tags)
         if: ${{ github.ref_type == 'tag' }}
         run: |
