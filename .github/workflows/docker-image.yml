@@ -44,7 +44,7 @@ jobs:
 
     strategy:
       matrix:
-        IDF_VERSION: [{}, {branch_or_tag: release-v5.1, ref: bb9200ace}]
+        IDF_VERSION: [{}, {branch_or_tag: release-v5.1, ref: ea5e0ff298e6257b31d8e0c81435e6d3937f04c7}]
 
     steps:
       # Depending on the branch/tag, set CLONE_BRANCH_OR_TAG variable (used in the Dockerfile
