@@ -17,6 +17,7 @@ name: Build Docker
 on:
   push:
     branches:
+      - 'docker'
       - 'main'
       - 'release/*'
     tags:
@@ -29,7 +30,7 @@ env:
   # Platforms to build the image for
   # Github runner is running out of space when we are building for multiple architectures in single runner
   BUILD_PLATFORMS: linux/amd64
-  DOCKERHUB_REPO: diegorro98/esp-matter #TODO delete
+  DOCKERHUB_REPO: darkxst/esp-matter #TODO delete
   REQUIRED_IDF_VERSION: v4.4.3
 
 jobs:
