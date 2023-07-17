@@ -106,4 +106,4 @@ jobs:
             ESP_MATTER_CLONE_BRANCH_OR_TAG=${{ env.CLONE_BRANCH_OR_TAG }}
             IDF_CLONE_SHALLOW=1
             IDF_CLONE_BRANCH_OR_TAG=${{ matrix.IDF_VERSION.branch_or_tag || env.REQUIRED_IDF_VERSION}}
-            IDF_CLONE_REF=${{ matrix.IDF_VERSION.ref }}
+            IDF_CHECKOUT_REF=${{ matrix.IDF_VERSION.ref }}
